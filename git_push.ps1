@@ -30,6 +30,7 @@
                 echo($command)
             }
             echo("ブランチ:$branch")
+            echo("ステータスを表示します。")
             $(git status)
 
             while ($true) {
@@ -38,13 +39,13 @@
                 }
                 Write-Host -NoNewline "pushしますか？[y/n]"
                 $input_line = $(Read-Host)
-                echo("")
+                echo($input_line)
 
                 if ("n", "no" -contains $input_line) {
                     echo("中止し、コミットを取り消します。")
                     $(git reset --soft HEAD^)
                     break
-                } elseif ("y", "yes" -notcontains $input_line) {
+                } elseif ("y", "yes" -contains $input_line) {
                     $return_string = $(git push origin $branch)
                     $return_string = $return_string -split "`n"
                     if ( $($return_string | foreach { $_ -replace " ", "" }) | Select-Object -Pattern "Connectiontimedout" ) {
@@ -55,6 +56,8 @@
                         echo($return_string)
                         break
                     }
+                    echo($return_string)
+                    $commit_flag = $false
                     break
                 }
             }
