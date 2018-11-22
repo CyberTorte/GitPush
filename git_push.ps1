@@ -3,6 +3,10 @@
 
     $commit_flag = $false
     $command_history = @()
+    $usage_text = @'
+git_push [-a, -u] -comment [コミットメッセージ] -branch [ブランチ名]
+-all , -update のどちらかと -comment -branch のパラメータは必須です。
+'@
 
     if ($all) {
         [void]$(git add --all)
@@ -11,7 +15,7 @@
         [void]$(git add -u)
         $command_history += "git add -u"
     } else {
-        throw New-Object System.ArgumentException("git addの引数が正しくありません。")
+        throw New-Object System.ArgumentException("git addの引数が正しくありません。`n$usage_text")
     }
 
     if ($comment) {
@@ -19,7 +23,7 @@
         $command_history += "git commit -m `"" + "$comment" + "`""
         $commit_flag = $true
     } else {
-        throw New-Object System.ArgumentNullException("コミットメッセージがありません。")
+        throw New-Object System.ArgumentNullException("コミットメッセージがありません。`n$usage_text")
     }
 
     if ($branch) {
@@ -37,7 +41,7 @@
                 if ($input_line) {
                     echo("無効な文字列が入力されました。")
                 }
-                Write-Host -NoNewline "pushしますか？[y/n]"
+                Write-Host -NoNewline "pushしますか？[y/n]＞"
                 $input_line = $(Read-Host)
                 echo($input_line)
 
@@ -46,17 +50,13 @@
                     $(git reset --soft HEAD^)
                     break
                 } elseif ("y", "yes" -contains $input_line) {
-                    $return_string = $(git push origin $branch)
-                    $return_string = $return_string -split "`n"
-                    if ( $($return_string | foreach { $_ -replace " ", "" }) | Select-Object -Pattern "Connectiontimedout" ) {
-                        echo("タイムアウトしました。")
-                        continue
-                    } elseif ( $($return_string | foreach { $_ -replace " ", "" }) | Select-Object -Pattern "fatal" ) {
-                        echo("pushに失敗しました。")
-                        echo($return_string)
-                        break
+
+                    $(git push origin $branch)
+                    
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "pushに失敗しました。"
                     }
-                    echo($return_string)
+
                     $commit_flag = $false
                     break
                 }
@@ -65,7 +65,7 @@
             throw New-Object System.ArgumentOutOfRangeException("ブランチの指定が間違っています。")
         }
     } else {
-        throw New-Object System.ArgumentException("ブランチ名が指定されていません。")
+        throw New-Object System.ArgumentException("ブランチ名が指定されていません。`n$usage_text")
     }
 
     trap {
