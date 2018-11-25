@@ -43,7 +43,7 @@ git_push [-a, -u] -comment [コミットメッセージ] -branch [ブランチ�
                 }
                 Write-Host -NoNewline "pushしますか？[y/n]＞"
                 $input_line = $(Read-Host)
-                echo($input_line)
+                echo("")
 
                 if ("n", "no" -contains $input_line) {
                     echo("中止し、コミットを取り消します。")
