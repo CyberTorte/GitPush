@@ -27,9 +27,9 @@ git_push [-a, -u] -comment [コミットメッセージ] -branch [ブランチ�
     }
 
     if ($branch) {
-        $branchs = $(git branch -a)
-        $branchs = $branchs -split "`n"
-        if ($($branchs | foreach { $_ -replace " ", "" }) | Select-String -Pattern "\*$branch" ) {
+        $branches = $(git branch -a)
+        $branches = $branches -split "`n"
+        if ($($branches | foreach { $_ -replace " ", "" }) | Select-String -Pattern "\*$branch" ) {
             foreach ($command in $command_history) {
                 echo($command)
             }
